@@ -50,16 +50,19 @@ subprojects {
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter:$springBootVersion")
         implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
 
         implementation("org.jetbrains.kotlin:kotlin-reflect")
-        testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 
         // JPA QueryDSL
         implementation("org.springframework.data:spring-data-commons:$springDataCommons")
         implementation("com.querydsl:querydsl-jpa:$queryDsl:jakarta")
         implementation("com.querydsl:querydsl-apt:$queryDsl:jakarta")
 
+        // test
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+        testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+        testImplementation("io.mockk:mockk:1.13.8")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 }
@@ -82,6 +85,7 @@ project(":core") {
     }
 
     dependencies {
+        // JPA QueryDSL
         compileOnly("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion")
         compileOnly("org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion")
         kapt("jakarta.persistence:jakarta.persistence-api")
@@ -109,10 +113,15 @@ project(":api") {
 
     dependencies {
         implementation(project(":core"))
+
+        // JPA QueryDSL
         implementation("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion")
         implementation("org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion")
         kapt("jakarta.persistence:jakarta.persistence-api")
         kapt("jakarta.annotation:jakarta.annotation-api")
+
+        // arrow function
+        implementation("io.arrow-kt:arrow-core:1.2.1")
     }
 
     val moduleMainClass = "com.mind.api.ApiApplicationKt"
