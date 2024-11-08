@@ -1,6 +1,6 @@
 package com.mind.api.common.dto
 
-import com.mind.api.common.enums.ResponseEnums
+import com.mind.core.enums.ResponseEnums
 import org.springframework.http.ResponseEntity
 
 object ResponseData {

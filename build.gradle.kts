@@ -54,7 +54,7 @@ subprojects {
 
         implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-        // JPA QueryDSL
+        // jpa
         implementation("org.springframework.data:spring-data-commons:$springDataCommons")
         implementation("com.querydsl:querydsl-jpa:$queryDsl:jakarta")
         implementation("com.querydsl:querydsl-apt:$queryDsl:jakarta")
@@ -62,6 +62,12 @@ subprojects {
         // coroutines
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinCoroutinesVersion")
+
+        // security
+        implementation("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
+        implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+        runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+        runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
         // test
         testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -97,9 +103,9 @@ project(":core") {
         kapt("jakarta.persistence:jakarta.persistence-api")
         kapt("jakarta.annotation:jakarta.annotation-api")
 
-        // Hikari
+        // hikari
         implementation("com.zaxxer:HikariCP:5.0.1")
-        // MySql
+        // mysql
         runtimeOnly("com.mysql:mysql-connector-j")
     }
 
