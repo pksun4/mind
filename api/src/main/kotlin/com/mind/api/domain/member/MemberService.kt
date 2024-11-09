@@ -2,13 +2,11 @@ package com.mind.api.domain.member
 
 import arrow.core.left
 import arrow.core.right
+import com.mind.api.security.SecurityUtils
 import com.mind.api.security.SecurityUtils.passwordEncode
-import com.mind.core.domain.member.Member
 import com.mind.core.domain.member.MemberRepository
-import com.mind.core.domain.member.MemberRequest
 import com.mind.core.domain.member.MemberRole
 import com.mind.core.enums.ResponseEnums
-import com.mind.core.enums.RoleEnums
 import com.mind.core.util.logger
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,24 +15,36 @@ import org.springframework.transaction.annotation.Transactional
 class MemberService(
     private val memberRepository: MemberRepository
 ) {
-
     @Transactional
-    suspend fun signUp(memberRequest: MemberRequest) =
+    fun signUp(memberRequest: MemberRequest) =
         runCatching {
-            memberRepository.findByEmail(memberRequest.email)?.let {
+            memberRepository.findMemberByEmail(memberRequest.email)?.let {
                 MemberError.MemberEmailDuplicated.left()
             } ?: memberRepository.save(
-                Member(
-                    email = memberRequest.email,
-                    password = memberRequest.password.passwordEncode(),
-                    name = memberRequest.name,
-                    gender = memberRequest.gender
-                ).apply {
+                MemberRequest.convert(memberRequest).apply {
                     this.memberRole = mutableListOf(
                         MemberRole.grantMember(this)
                     )
                 }
             ).right()
+        }.getOrElse {
+            it.errorLogging(this.javaClass)
+            it.throwUnknownError()
+        }
+
+    @Transactional
+    fun updateMember(memberUpdateRequest: MemberUpdateRequest) =
+        runCatching {
+            SecurityUtils.getCurrentUser()?.let {
+                memberRepository.findMemberById(it.memberKey)?.let { member ->
+                    if (SecurityUtils.matchPassword(memberUpdateRequest.currentPassword, member.password)) {
+                        member.password = memberUpdateRequest.changePassword.passwordEncode()
+                        Unit.right();
+                    } else {
+                        MemberError.MemberPasswordIncorrect.left()
+                    }
+                } ?: MemberError.MemberNone.left()
+            } ?: MemberError.MemberNoneToken.left()
         }.getOrElse {
             it.errorLogging(this.javaClass)
             it.throwUnknownError()
@@ -47,6 +57,9 @@ class MemberService(
 sealed class MemberError(
     val responseEnums: ResponseEnums
 )  {
-    data object MemberEmailDuplicated: MemberError(ResponseEnums.MEMBER_EMAIL_DUPLICATED)
+    data object MemberEmailDuplicated : MemberError(ResponseEnums.MEMBER_EMAIL_DUPLICATED)
+    data object MemberNone : MemberError(ResponseEnums.MEMBER_NONE)
+    data object MemberNoneToken : MemberError(ResponseEnums.MEMBER_NONE)
+    data object MemberPasswordIncorrect : MemberError(ResponseEnums.MEMBER_PASSWORD_INCORRECT)
     data class Unknown(val className: String): MemberError(ResponseEnums.ERROR)
 }

@@ -14,7 +14,7 @@ class CustomUserDetailService(
 ) : UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails =
-        memberRepository.findByEmail(username)?.let {
+        memberRepository.findMemberByEmail(username)?.let {
             createUserDetails(it)
         } ?: throw UsernameNotFoundException("해당 유저가 없습니다.")
 

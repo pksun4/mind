@@ -3,16 +3,15 @@ package com.mind.api.domain.authentication
 import arrow.core.left
 import arrow.core.right
 import com.mind.api.security.JwtTokenProvider
-import com.mind.api.security.TokenRequest
-import com.mind.api.security.TokenResponse
 import com.mind.core.domain.member.MemberRepository
 import com.mind.core.enums.ResponseEnums
 import com.mind.core.util.logger
-import jakarta.transaction.Transactional
+import io.swagger.v3.oas.annotations.Operation
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthenticationService(
@@ -26,21 +25,17 @@ class AuthenticationService(
     }
 
     @Transactional
+    @Operation(summary = "로그인")
     suspend fun login(tokenRequest: TokenRequest) =
         runCatching {
-            val authenticationToken = UsernamePasswordAuthenticationToken(
-                tokenRequest.email,
-                tokenRequest.password
-            )
-
+            val authenticationToken = UsernamePasswordAuthenticationToken(tokenRequest.email, tokenRequest.password)
             val authentication = authenticationManagerBuilder.`object`.authenticate(authenticationToken)
 
-            memberRepository.findByEmail(tokenRequest.email)?.let {
+            memberRepository.findMemberByEmail(tokenRequest.email)?.let {
                 buildToken(authentication).right()
             } ?: AuthenticationError.AuthenticationIncorrect.left()
         }.getOrElse {
-            it.errorLogging(this.javaClass)
-            AuthenticationError.AuthenticationFail.left()
+            AuthenticationError.AuthenticationIncorrect.left()
         }
 
     private fun buildToken(authentication: Authentication) = TokenResponse(
@@ -56,7 +51,6 @@ class AuthenticationService(
 sealed class AuthenticationError(
     val responseEnums: ResponseEnums
 ) {
-    data object AuthenticationFail: AuthenticationError(ResponseEnums.AUTHENTICATION_FAIL)
     data object AuthenticationIncorrect: AuthenticationError(ResponseEnums.AUTHENTICATION_INCORRECT)
     data class Unknown(val className: String): AuthenticationError(ResponseEnums.ERROR)
 }

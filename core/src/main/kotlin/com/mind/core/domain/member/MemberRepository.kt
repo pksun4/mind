@@ -14,5 +14,6 @@ class MemberRepositorySupport(
 
 @Repository
 interface MemberRepository : JpaRepository<Member, Long> {
-    fun findByEmail(email: String) : Member?
+    fun findMemberById(id: Long) : Member?
+    fun findMemberByEmail(email: String) : Member?
 }
