@@ -1,9 +1,12 @@
 package service
 
+import com.mind.api.domain.board.BoardError
+import com.mind.api.domain.board.BoardRequest
 import com.mind.api.domain.board.BoardSaveRequest
 import com.mind.api.domain.board.BoardService
 import com.mind.core.domain.board.Board
 import com.mind.core.domain.board.BoardRepository
+import com.mind.core.domain.board.BoardRepositorySupport
 import com.mind.core.enums.BoardEnums
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -15,7 +18,8 @@ import org.junit.jupiter.api.Test
 internal class BoardServiceTest {
 
     private val boardRepository: BoardRepository = mockk()
-    private val boardService: BoardService = BoardService(boardRepository)
+    private val boardRepositorySupport: BoardRepositorySupport = mockk()
+    private val boardService: BoardService = BoardService(boardRepository, boardRepositorySupport)
 
     companion object {
         private const val ID = 1L
@@ -44,6 +48,48 @@ internal class BoardServiceTest {
                 }
             )
             coVerify(exactly = 1) { boardRepository.save(any()) }
+        }
+    }
+
+    @Test
+    fun `success get board`() {
+        val board = settingBoard()
+
+        coEvery { boardRepositorySupport.findActiveBoardById(any()) } answers { board }
+        runBlocking {
+            boardService.getBoard(ID).fold(
+                { },
+                { success -> assertEquals(success.id, ID) }
+            )
+            coVerify(exactly = 1) { boardRepositorySupport.findActiveBoardById(ID) }
+        }
+    }
+
+    @Test
+    fun `fail get board`() {
+        coEvery { boardRepositorySupport.findActiveBoardById(any()) } answers { null }
+        runBlocking {
+            boardService.getBoard(ID).fold(
+                { fail -> assertEquals(fail, BoardError.BoardNone) },
+                { }
+            )
+        }
+    }
+
+    @Test
+    fun `success get board list`() {
+        val boardRequest = BoardRequest(
+            type = TYPE,
+            title= null
+        )
+
+        coEvery { boardRepositorySupport.countActiveBoardList(any(), any()) } answers { 1 }
+        coEvery { boardRepositorySupport.findActiveBoardList(any(), any(), any()) } answers { arrayOf(settingBoard()).toMutableList() }
+        runBlocking {
+            boardService.getBoardList(boardRequest).fold(
+                { },
+                { success -> assertEquals(success.list?.size, 1) }
+            )
         }
     }
 
