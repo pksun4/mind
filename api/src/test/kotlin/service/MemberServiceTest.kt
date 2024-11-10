@@ -15,7 +15,6 @@ import io.mockk.mockk
 import kotlin.test.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -34,19 +33,6 @@ internal class MemberServiceTest {
         private const val NAME = "마인드"
         private val GENDER = GenderEnums.M
     }
-
-    @BeforeEach
-    fun settingSecurity() {
-        val user: UserDetails = CustomUser(
-            1L,
-            EMAIL,
-            PASSWORD,
-            listOf(SimpleGrantedAuthority("ROLE_USER"))
-        )
-        val context = SecurityContextHolder.getContext()
-        context.authentication = UsernamePasswordAuthenticationToken(user, user.password, user.authorities)
-    }
-
 
     @Test
     fun `success signUp`() {
@@ -85,6 +71,7 @@ internal class MemberServiceTest {
 
     @Test
     fun `success update member`() {
+        settingSecurity()
         val memberUpdateParams = MemberUpdateRequest(currentPassword = "1234", changePassword = "9999")
 
         coEvery { memberRepository.findMemberById(any()) } answers { settingMember() }
@@ -99,6 +86,7 @@ internal class MemberServiceTest {
 
     @Test
     fun `fail update member`() {
+        settingSecurity()
         val memberUpdateParams = MemberUpdateRequest(currentPassword = "1234", changePassword = "9999")
 
         coEvery { memberRepository.findMemberById(any()) } answers { null }
@@ -125,4 +113,16 @@ internal class MemberServiceTest {
         name = NAME,
         gender = GENDER
     )
+
+    private fun settingSecurity() {
+        val user: UserDetails = CustomUser(
+            1L,
+            EMAIL,
+            PASSWORD,
+            listOf(SimpleGrantedAuthority("ROLE_USER"))
+        )
+        val context = SecurityContextHolder.getContext()
+        context.authentication = UsernamePasswordAuthenticationToken(user, user.password, user.authorities)
+    }
+
 }

@@ -59,5 +59,4 @@ class Member(
             Member::gender
         )
     )
-
 }
