@@ -26,7 +26,7 @@ class AuthenticationService(
 
     @Transactional
     @Operation(summary = "로그인")
-    suspend fun login(tokenRequest: TokenRequest) =
+    fun login(tokenRequest: TokenRequest) =
         runCatching {
             val authenticationToken = UsernamePasswordAuthenticationToken(tokenRequest.email, tokenRequest.password)
             val authentication = authenticationManagerBuilder.`object`.authenticate(authenticationToken)
@@ -52,5 +52,5 @@ sealed class AuthenticationError(
     val responseEnums: ResponseEnums
 ) {
     data object AuthenticationIncorrect: AuthenticationError(ResponseEnums.AUTHENTICATION_INCORRECT)
-    data class Unknown(val className: String): AuthenticationError(ResponseEnums.ERROR)
+    class Unknown(val className: String): AuthenticationError(ResponseEnums.ERROR)
 }

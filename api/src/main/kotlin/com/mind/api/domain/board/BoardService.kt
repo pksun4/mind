@@ -116,5 +116,5 @@ sealed class BoardError(
 ) {
     data object BoardNone : BoardError(ResponseEnums.BOARD_NONE)
     data object BoardNoneAuth : BoardError(ResponseEnums.BOARD_NONE_AUTH)
-    data class Unknown(val className: String): BoardError(ResponseEnums.ERROR)
+    class Unknown(val className: String): BoardError(ResponseEnums.ERROR)
 }

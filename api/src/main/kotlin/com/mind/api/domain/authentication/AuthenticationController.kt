@@ -6,7 +6,9 @@ import com.mind.api.domain.member.MemberResponse
 import com.mind.api.domain.member.MemberService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -19,14 +21,14 @@ class AuthenticationController(
 ) {
     @PostMapping("/signup")
     @Operation(summary = "회원가입")
-    suspend fun signUp(memberRequest: MemberRequest) = memberService.signUp(memberRequest).fold(
+    fun signUp(@Valid @RequestBody memberRequest: MemberRequest) = memberService.signUp(memberRequest).fold(
         { ResponseData.fail(it.responseEnums) },
         { ResponseData.success(MemberResponse.make(it)) }
     )
 
     @PostMapping("/login")
     @Operation(summary = "로그인")
-    suspend fun login(tokenRequest: TokenRequest) = authenticationService.login(tokenRequest).fold(
+    fun login(@Valid @RequestBody tokenRequest: TokenRequest) = authenticationService.login(tokenRequest).fold(
         { ResponseData.fail(it.responseEnums) },
         { ResponseData.success(it) }
     )

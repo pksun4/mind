@@ -51,6 +51,7 @@ subprojects {
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter:$springBootVersion")
         implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+        implementation("org.springframework.boot:spring-boot-starter-validation:$springBootVersion")
 
         implementation("org.jetbrains.kotlin:kotlin-reflect")
 

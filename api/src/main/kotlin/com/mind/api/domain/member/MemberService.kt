@@ -61,5 +61,5 @@ sealed class MemberError(
     data object MemberNone : MemberError(ResponseEnums.MEMBER_NONE)
     data object MemberNoneToken : MemberError(ResponseEnums.MEMBER_NONE)
     data object MemberPasswordIncorrect : MemberError(ResponseEnums.MEMBER_PASSWORD_INCORRECT)
-    data class Unknown(val className: String): MemberError(ResponseEnums.ERROR)
+    class Unknown(val className: String): MemberError(ResponseEnums.ERROR)
 }

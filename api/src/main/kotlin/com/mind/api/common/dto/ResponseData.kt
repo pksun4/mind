@@ -11,3 +11,5 @@ object ResponseData {
 class ResponseSuccess<T>(val code: String, val message: String, val data: T)
 
 class ResponseFail(val code: String, val message: String)
+
+class ResponseException<T> (val code: String = ResponseEnums.ERROR.code, val message: String = ResponseEnums.ERROR.message, val error: T? = null)

@@ -3,6 +3,7 @@ package com.mind.core.enums
 enum class ResponseEnums(val code: String, val message: String) {
     // default
     SUCCESS("200", "정상 처리 되었습니다."),
+    BAD("400", "잘못된 요청입니다."),
     ERROR("500", "오류가 발생 했습니다."),
 
     // member [1000]

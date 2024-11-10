@@ -1,9 +1,11 @@
 package com.mind.api.domain.board
 
 import com.mind.api.common.dto.PagingRequestData
+import com.mind.api.common.valid.EnumValid
 import com.mind.core.domain.board.Board
 import com.mind.core.enums.BoardEnums
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 import java.time.LocalDateTime
 import kotlin.math.max
 import org.springframework.data.domain.PageRequest
@@ -11,16 +13,22 @@ import org.springframework.data.domain.Sort
 
 @Schema(description = "게시글 저장 요청")
 class BoardSaveRequest(
+
     @Schema(name = "게시글 유형")
-    val type: BoardEnums,
+    @field:NotBlank(message = "게시글 유형은 필수값입니다.")
+    @field:EnumValid(enumClass = BoardEnums::class, message = "SHARE/ETC")
+    val type: String,
+
     @Schema(name = "제목")
+    @field:NotBlank(message = "제목은 필수값입니다.")
     val title: String,
+
     @Schema(name = "내용")
     val content: String?
 ) {
     companion object {
         fun convert(boardSaveRequest: BoardSaveRequest) = Board(
-            type = boardSaveRequest.type,
+            type = BoardEnums.valueOf(boardSaveRequest.type),
             title = boardSaveRequest.title,
             content = boardSaveRequest.content
         )
@@ -81,8 +89,11 @@ class BoardRequest(
 
 @Schema(description = "게시글 수정 요청")
 class BoardUpdateRequest(
+
     @Schema(name = "제목")
+    @field:NotBlank(message = "게시글 제목은 필수값입니다.")
     val title: String,
+
     @Schema(name = "내용")
     val content: String?
 )
