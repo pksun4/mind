@@ -4,6 +4,7 @@ import arrow.core.left
 import arrow.core.right
 import com.mind.api.common.dto.PagingResponseData
 import com.mind.api.common.dto.PagingWrapper
+import com.mind.api.security.SecurityUtils
 import com.mind.core.domain.board.BoardRepository
 import com.mind.core.domain.board.BoardRepositorySupport
 import com.mind.core.enums.ResponseEnums
@@ -71,6 +72,41 @@ class BoardService(
             it.throwUnknownError()
         }
 
+    @Transactional
+    fun removeBoard(id: Long) =
+        runCatching {
+            boardRepositorySupport.findActiveBoardById(id)?.let {
+                val currentUser = SecurityUtils.getCurrentUser()
+                if (currentUser?.memberKey == it.createdBy) {
+                    it.isDeleted = true
+                    Unit.right()
+                } else {
+                    BoardError.BoardNoneAuth.left()
+                }
+            } ?: BoardError.BoardNone.left()
+        }.getOrElse {
+            it.errorLogging(this.javaClass)
+            it.throwUnknownError()
+        }
+
+    @Transactional
+    fun updateBoard(id: Long, boardUpdateRequest: BoardUpdateRequest) =
+        runCatching {
+            boardRepositorySupport.findActiveBoardById(id)?.let {
+                val currentUser = SecurityUtils.getCurrentUser()
+                if (currentUser?.memberKey == it.createdBy) {
+                    it.title = boardUpdateRequest.title
+                    it.content = boardUpdateRequest.content
+                    it.right()
+                } else {
+                    BoardError.BoardNoneAuth.left()
+                }
+            } ?: BoardError.BoardNone.left()
+        }.getOrElse {
+            it.errorLogging(this.javaClass)
+            it.throwUnknownError()
+        }
+
     private fun <C> Throwable.errorLogging(kClass: Class<C>) = logger().error("[Error][${kClass.name}]", this)
     private fun Throwable.throwUnknownError() = BoardError.Unknown(this.javaClass.name).left()
 }
@@ -79,5 +115,6 @@ sealed class BoardError(
     val responseEnums: ResponseEnums
 ) {
     data object BoardNone : BoardError(ResponseEnums.BOARD_NONE)
+    data object BoardNoneAuth : BoardError(ResponseEnums.BOARD_NONE_AUTH)
     data class Unknown(val className: String): BoardError(ResponseEnums.ERROR)
 }

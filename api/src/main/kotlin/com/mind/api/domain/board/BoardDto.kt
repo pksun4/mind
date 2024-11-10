@@ -9,8 +9,9 @@ import kotlin.math.max
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 
+@Schema(description = "게시글 저장 요청")
 class BoardSaveRequest(
-    @Schema(name = "게시판 유형")
+    @Schema(name = "게시글 유형")
     val type: BoardEnums,
     @Schema(name = "제목")
     val title: String,
@@ -26,10 +27,11 @@ class BoardSaveRequest(
     }
 }
 
+@Schema(description = "게시글 응답")
 class BoardResponse(
     @Schema(name = "아이디")
     val id: Long,
-    @Schema(name = "게시판 유형")
+    @Schema(name = "게시글 유형")
     val type: BoardEnums,
     @Schema(name = "제목")
     val title: String,
@@ -55,8 +57,9 @@ class BoardResponse(
     }
 }
 
+@Schema(description = "게시글 조회 요청")
 class BoardRequest(
-    @Schema(name = "게시판 유형")
+    @Schema(name = "게시글 유형")
     val type: BoardEnums,
     @Schema(name = "제목")
     val title: String?
@@ -75,3 +78,11 @@ class BoardRequest(
         }
     }
 }
+
+@Schema(description = "게시글 수정 요청")
+class BoardUpdateRequest(
+    @Schema(name = "제목")
+    val title: String,
+    @Schema(name = "내용")
+    val content: String?
+)
